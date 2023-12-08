@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprite Sheet Animation</title>
+    <style>
+        canvas {
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="myCanvas" width="300" height="300"></canvas>
+    <script>
+        // Get the canvas element and its context
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+        // Define the initial position of the GIF
+        let gifX = 0;
+        let gifY = 0;
+
+        let animationFrameId = null;
+        // Load the sprite sheet
+        const spriteSheet = new Image();
+        spriteSheet.src = 'funny_baby_sprite_sheet.png';
+
+        // Define the dimensions of each frame
+        const frameWidth = 100;
+        const frameHeight = 100;
+
+        // Total number of frames in the sprite sheet
+        const totalFrames = 35;
+
+        // Current frame index
+        let currentFrame = 0;
+
+        // Define a frame rate (e.g., 10 frames per second)
+        const frameRate = 60;
+        const frameInterval = 1000 / frameRate; // Calculate the frame interval in milliseconds
+
+        let lastFrameTime = 0; // Keep track of the last frame time
+
+        // Function to draw a frame on the canvas
+        function drawFrame(timestamp) {
+            if (!lastFrameTime) {
+                lastFrameTime = timestamp;
+            }
+
+            // Calculate the time elapsed since the last frame
+            const elapsed = timestamp - lastFrameTime;
+
+            // Check if enough time has passed to display the next frame
+            if (elapsed >= frameInterval) {
+                // Clear the canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Calculate the position of the current frame in the sprite sheet
+                const frameX = (currentFrame % (spriteSheet.width / frameWidth)) * frameWidth;
+                const frameY = Math.floor(currentFrame / (spriteSheet.width / frameWidth)) * frameHeight;
+
+                // Draw the current frame on the canvas
+                ctx.drawImage(spriteSheet, frameX, frameY, frameWidth, frameHeight, gifX, gifY, 100, 100);
+
+                // Increment the current frame index
+                currentFrame = (currentFrame + 1) % totalFrames;
+
+                // Update the last frame time
+                lastFrameTime = timestamp;
+            }
+
+            // Call the function recursively to create an animation loop
+            animationFrameId = requestAnimationFrame(drawFrame);
+        }
+
+        // Event listener for keydown events
+        document.addEventListener('keydown', (event) => {
+            const speed = 5; // Adjust the speed as needed
+
+            switch (event.key) {
+                case 'ArrowLeft':
+                    gifX -= speed;
+                    break;
+                case 'ArrowRight':
+                    gifX += speed;
+                    break;
+                case 'ArrowUp':
+                    gifY -= speed;
+                    break;
+                case 'ArrowDown':
+                    gifY += speed;
+                    break;
+            }
+
+            // Cancel the previous animation frame
+            cancelAnimationFrame(animationFrameId);
+
+            // Start a new animation frame
+            animationFrameId = requestAnimationFrame(drawFrame);
+        });
+
+        // Start the animation
+        spriteSheet.onload = () => {
+            animationFrameId = requestAnimationFrame(drawFrame);
+        };
+    </script>
+</body>
+
+</html>
